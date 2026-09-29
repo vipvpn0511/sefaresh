@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1d4ed8">
+<title>تعمیرات موبایل علی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f8;--card:#fff;--ink:#16203a;--mute:#5a6685;--line:#cfd6e8;--brand:#1d4ed8;--tint:#e3ebff;--wait:#b7791f;--ready:#0f7b4f;--done:#6b7b82}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.7 Vazirmatn,Tahoma,sans-serif}
+header{background:var(--brand);color:#fff;padding:22px 16px 18px}
+header h1{margin:0;font-size:1.5rem;font-weight:800}
+header p{margin:2px 0 0;opacity:.85;font-size:.9rem}
+main{max-width:640px;margin:0 auto;padding:16px}
+form{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px}
+label{display:grid;gap:4px;font-weight:600;font-size:.9rem}
+input,select,textarea{font:inherit;padding:10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);width:100%}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #93b4f8;outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{font:inherit;font-weight:600;cursor:pointer;border:0;border-radius:6px;padding:11px 16px}
+.save{background:var(--brand);color:#fff}
+.cancel{background:#eee;color:var(--ink);display:none}
+.bar{display:flex;gap:8px;margin:22px 0 10px;align-items:center}
+.bar h2{margin:0;font-size:1.1rem;flex:none}
+.bar input{flex:1}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.chip{background:#fff;border:1px solid var(--line);color:var(--ink);padding:5px 12px;font-size:.85rem}
+.chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.item{background:var(--card);border:1px solid var(--line);border-right:6px solid var(--done);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.item.s-wait{border-right-color:var(--wait)}
+.item.s-ready{border-right-color:var(--ready)}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.name{font-weight:800}
+.date{color:var(--mute);font-size:.8rem}
+.meta{color:var(--mute);font-size:.9rem;margin:2px 0}
+.late{color:#b42318;font-weight:600}
+.acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.acts select{width:auto;padding:6px 8px}
+.acts a,.acts button{padding:6px 12px;font-size:.85rem;border-radius:6px;text-decoration:none;background:var(--tint);color:var(--brand);font-weight:600}
+.acts .wa{background:#dcf8e6;color:#0a6b35}
+.acts .del{background:#f7e3e0;color:#9b2c1f}
+.empty{text-align:center;color:var(--mute);padding:28px 8px}
+.total{color:var(--mute);font-size:.85rem;flex:1}
+.tools{display:flex;gap:8px;align-items:center;margin:0 0 10px;flex-wrap:wrap}
+.tool{background:var(--tint);color:var(--brand);padding:6px 12px;font-size:.85rem}
+details{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:600}
+.rep{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--line)}
+#lock{position:fixed;inset:0;background:var(--brand);display:none;place-items:center;z-index:9;padding:16px}
+#lock form{width:100%;max-width:320px}
+#rc{display:none}
+@media print{body>*:not(#rc){display:none!important}#rc{display:block;padding:16px;font-size:15px;color:#000;line-height:2}}
+</style>
+</head>
+<body>
+<header>
+  <h1>تعمیرات موبایل علی</h1>
+  <p>ثبت و پیگیری مشتری‌ها</p>
+</header>
+<main>
+  <form id="f">
+    <input type="hidden" id="eid">
+    <div class="row">
+      <label>نام مشتری<input id="name" required></label>
+      <label>شماره تماس<input id="phone" type="tel" inputmode="tel" required></label>
+    </div>
+    <div class="row">
+      <label>مدل گوشی<input id="model" required></label>
+      <label>هزینه (تومان)<input id="cost" type="number" inputmode="numeric" min="0"></label>
+    </div>
+    <label>مشکل دستگاه<textarea id="issue" rows="2" required></textarea></label>
+    <div class="row">
+      <label>تاریخ تحویل<input id="due" type="date"></label>
+      <label>وضعیت
+        <select id="status">
+          <option value="wait">در حال تعمیر</option>
+          <option value="ready">آماده تحویل</option>
+          <option value="done">تحویل شد</option>
+        </select>
+      </label>
+    </div>
+    <button class="save" id="sbtn" type="submit">ثبت مشتری</button>
+    <button class="cancel" id="cbtn" type="button">انصراف از ویرایش</button>
+  </form>
+
+  <div class="bar">
+    <h2>مشتری‌ها</h2>
+    <input id="q" type="search" placeholder="جستجو با نام، شماره، مدل یا شماره رسید">
+  </div>
+  <div class="chips">
+    <button type="button" class="chip" data-f="all">همه</button>
+    <button type="button" class="chip" data-f="wait">در حال تعمیر</button>
+    <button type="button" class="chip" data-f="ready">آماده تحویل</button>
+    <button type="button" class="chip" data-f="done">تحویل شد</button>
+  </div>
+  <details>
+    <summary>گزارش درآمد ماهانه</summary>
+    <div id="rep"></div>
+  </details>
+  <div class="tools">
+    <span class="total" id="total"></span>
+    <button type="button" class="tool" id="exp">دانلود پشتیبان</button>
+    <button type="button" class="tool" id="imp">بازیابی پشتیبان</button>
+    <button type="button" class="tool" id="pin">تنظیم رمز</button>
+    <input type="file" id="file" accept=".json" hidden>
+  </div>
+  <div id="list"></div>
+</main>
+
+<div id="rc"></div>
+<div id="lock">
+  <form id="lf">
+    <label>رمز ورود<input id="lp" type="password" inputmode="numeric" autocomplete="off"></label>
+    <button class="save" type="submit">ورود</button>
+  </form>
+</div>
+
+<script>
+var KEY = 'repair-customers', PINKEY = 'repair-pin';
+var LABELS = {wait: 'در حال تعمیر', ready: 'آماده تحویل', done: 'تحویل شد'};
+var SHOP = 'تعمیرات موبایل علی';
+var ADDR = 'سرخس؛ طالقانی غربی، موبایل علی';
+var TEL = '09300517581';
+var THANKS = 'با تشکر از اعتماد شما';
+var data = [], flt = 'all';
+var $ = function (id) { return document.getElementById(id); };
+
+function fa2en(s) {
+  return String(s).replace(/[۰-۹]/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d); })
+                  .replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); });
+}
+function load() {
+  try { data = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { data = []; }
+  var max = 1000;
+  data.forEach(function (c) { if (c.no && c.no > max) max = c.no; });
+  data.forEach(function (c) { if (!c.no) c.no = ++max; });
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { alert('ذخیره‌سازی در این مرورگر ممکن نیست.'); }
+}
+function el(tag, cls, text) {
+  var n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+function nextNo() {
+  var m = 1000;
+  data.forEach(function (c) { if (c.no > m) m = c.no; });
+  return m + 1;
+}
+function fd(d) { return new Date(d).toLocaleDateString('fa-IR'); }
+function money(c) { return c.cost ? Number(c.cost).toLocaleString('fa-IR') + ' تومان' : 'مشخص نشده'; }
+function today() { return new Date().toISOString().slice(0, 10); }
+function isLate(c) { return c.due && c.status !== 'done' && c.due < today(); }
+
+function waNumber(p) {
+  p = fa2en(p).replace(/\D/g, '');
+  if (p.indexOf('00') === 0) return p.slice(2);
+  if (p[0] === '0') return '98' + p.slice(1);
+  if (p.length === 10 && p[0] === '9') return '98' + p;
+  return p;
+}
+function receiptLines(c) {
+  var l = ['رسید شماره ' + c.no, 'مشتری: ' + c.name, 'دستگاه: ' + c.model,
+           'مشکل: ' + c.issue, 'هزینه: ' + money(c), 'وضعیت: ' + LABELS[c.status]];
+  if (c.due) l.push('تاریخ تحویل: ' + fd(c.due));
+  return l;
+}
+function footerLines() {
+  return ['آدرس: ' + ADDR, 'تماس: ' + TEL];
+}
+function waLink(c) {
+  var text = '*' + SHOP + '*\n' + receiptLines(c).join('\n') +
+             '\n\n' + footerLines().join('\n') + '\n\n' + THANKS;
+  return 'https://wa.me/' + waNumber(c.phone) + '?text=' + encodeURIComponent(text);
+}
+function smsLink(c) {
+  var text = 'سلام ' + c.name + '، گوشی ' + c.model + ' شما آماده تحویل است. ' + SHOP + ' - ' + TEL;
+  return 'sms:' + fa2en(c.phone).replace(/[^\d+]/g, '') + '?body=' + encodeURIComponent(text);
+}
+function printReceipt(c) {
+  var rc = $('rc');
+  rc.textContent = '';
+  rc.appendChild(el('h2', '', SHOP));
+  receiptLines(c).forEach(function (t) { rc.appendChild(el('div', '', t)); });
+  rc.appendChild(el('div', '', 'تاریخ ثبت: ' + fd(c.id)));
+  footerLines().forEach(function (t) { rc.appendChild(el('div', '', t)); });
+  rc.appendChild(el('h3', '', THANKS));
+  window.print();
+}
+
+function renderReport() {
+  var m = {}, box = $('rep');
+  box.textContent = '';
+  data.forEach(function (c) {
+    if (c.status === 'done' && c.cost) {
+      var k = new Date(c.doneAt || c.id).toLocaleDateString('fa-IR', {year: 'numeric', month: 'long'});
+      m[k] = (m[k] || 0) + Number(c.cost);
+    }
+  });
+  var keys = Object.keys(m);
+  if (!keys.length) { box.appendChild(el('div', 'meta', 'هنوز دستگاه تحویل‌شده‌ای با هزینه ثبت نشده.')); return; }
+  keys.forEach(function (k) {
+    var r = el('div', 'rep');
+    r.appendChild(el('span', '', k));
+    r.appendChild(el('strong', '', m[k].toLocaleString('fa-IR') + ' تومان'));
+    box.appendChild(r);
+  });
+}
+
+function render() {
+  var q = fa2en($('q').value.trim().toLowerCase());
+  var list = $('list');
+  list.textContent = '';
+  document.querySelectorAll('.chip').forEach(function (b) {
+    b.classList.toggle('on', b.getAttribute('data-f') === flt);
+  });
+  var shown = data.filter(function (c) {
+    if (flt !== 'all' && c.status !== flt) return false;
+    return !q || (c.no + ' ' + c.name + ' ' + fa2en(c.phone) + ' ' + c.model).toLowerCase().indexOf(q) > -1;
+  });
+  $('total').textContent = data.length + ' مشتری ثبت شده';
+  renderReport();
+  if (!shown.length) {
+    list.appendChild(el('div', 'empty', data.length ? 'موردی پیدا نشد.' : 'هنوز مشتری ثبت نشده. فرم بالا را پر کن.'));
+    return;
+  }
+  shown.slice().reverse().forEach(function (c) {
+    var box = el('div', 'item s-' + c.status);
+    var top = el('div', 'top');
+    top.appendChild(el('span', 'name', '#' + c.no + ' ' + c.name));
+    top.appendChild(el('span', 'date', fd(c.id)));
+    box.appendChild(top);
+    box.appendChild(el('div', 'meta', c.model + ' - ' + c.issue));
+    box.appendChild(el('div', 'meta', 'هزینه: ' + money(c)));
+    if (c.due) box.appendChild(el('div', isLate(c) ? 'meta late' : 'meta',
+      'تحویل: ' + fd(c.due) + (isLate(c) ? ' (دیرکرد)' : '')));
+
+    var acts = el('div', 'acts');
+    var sel = document.createElement('select');
+    Object.keys(LABELS).forEach(function (k) {
+      var o = el('option', '', LABELS[k]);
+      o.value = k;
+      if (k === c.status) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.onchange = function () {
+      c.status = sel.value;
+      c.doneAt = c.status === 'done' ? Date.now() : null;
+      save(); render();
+    };
+    acts.appendChild(sel);
+
+    var call = el('a', '', 'تماس');
+    call.href = 'tel:' + fa2en(c.phone).replace(/[^\d+]/g, '');
+    acts.appendChild(call);
+
+    var w = el('a', 'wa', 'رسید واتساپ');
+    w.href = waLink(c); w.target = '_blank'; w.rel = 'noopener';
+    acts.appendChild(w);
+
+    var sms = el('a', '', 'پیامک آماده');
+    sms.href = smsLink(c);
+    acts.appendChild(sms);
+
+    var pr = el('button', '', 'چاپ رسید');
+    pr.type = 'button';
+    pr.onclick = function () { printReceipt(c); };
+    acts.appendChild(pr);
+
+    var ed = el('button', '', 'ویرایش');
+    ed.type = 'button';
+    ed.onclick = function () { startEdit(c); };
+    acts.appendChild(ed);
+
+    var del = el('button', 'del', 'حذف');
+    del.type = 'button';
+    del.onclick = function () {
+      if (confirm('«' + c.name + '» حذف شود؟')) {
+        data = data.filter(function (x) { return x.id !== c.id; });
+        save(); render();
+      }
+    };
+    acts.appendChild(del);
+    box.appendChild(acts);
+    list.appendChild(box);
+  });
+}
+
+function startEdit(c) {
+  $('eid').value = c.id;
+  $('name').value = c.name; $('phone').value = c.phone; $('model').value = c.model;
+  $('cost').value = c.cost; $('issue').value = c.issue; $('due').value = c.due || '';
+  $('status').value = c.status;
+  $('sbtn').textContent = 'ذخیره تغییرات';
+  $('cbtn').style.display = 'block';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+function endEdit() {
+  $('f').reset();
+  $('eid').value = '';
+  $('sbtn').textContent = 'ثبت مشتری';
+  $('cbtn').style.display = 'none';
+}
+$('cbtn').onclick = endEdit;
+
+$('f').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var v = function (id) { return $(id).value.trim(); };
+  var id = $('eid').value;
+  if (id) {
+    var c = data.filter(function (x) { return String(x.id) === id; })[0];
+    if (c) {
+      var wasDone = c.status === 'done';
+      c.name = v('name'); c.phone = v('phone'); c.model = v('model');
+      c.issue = v('issue'); c.cost = v('cost'); c.due = v('due'); c.status = v('status');
+      if (c.status === 'done' && !wasDone) c.doneAt = Date.now();
+      if (c.status !== 'done') c.doneAt = null;
+    }
+  } else {
+    var s = v('status');
+    data.push({
+      id: Date.now(), no: nextNo(),
+      name: v('name'), phone: v('phone'), model: v('model'),
+      issue: v('issue'), cost: v('cost'), due: v('due'), status: s,
+      doneAt: s === 'done' ? Date.now() : null
+    });
+  }
+  save();
+  endEdit();
+  render();
+});
+
+$('q').addEventListener('input', render);
+document.querySelectorAll('.chip').forEach(function (b) {
+  b.onclick = function () { flt = b.getAttribute('data-f'); render(); };
+});
+
+$('exp').onclick = function () {
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ali-repair-backup-' + today() + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+$('imp').onclick = function () { $('file').click(); };
+$('file').onchange = function (e) {
+  var f = e.target.files[0];
+  if (!f) return;
+  var r = new FileReader();
+  r.onload = function () {
+    try {
+      var arr = JSON.parse(r.result);
+      if (!Array.isArray(arr)) throw 0;
+      if (confirm('اطلاعات فعلی با فایل پشتیبان جایگزین شود؟')) { data = arr; load(); save(); render(); }
+    } catch (err) { alert('فایل پشتیبان معتبر نیست.'); }
+  };
+  r.readAsText(f);
+  e.target.value = '';
+};
+
+// رمز ورود (قفل ساده، نه امنیت کامل)
+function getPin() { try { return localStorage.getItem(PINKEY); } catch (e) { return null; } }
+function lockIfNeeded() {
+  if (getPin()) { $('lock').style.display = 'grid'; $('lp').focus(); }
+}
+$('pin').onclick = function () {
+  var p = prompt('رمز جدید را وارد کن (خالی بگذار تا رمز حذف شود)');
+  if (p === null) return;
+  try {
+    if (p.trim()) localStorage.setItem(PINKEY, encodeURIComponent(fa2en(p.trim())));
+    else localStorage.removeItem(PINKEY);
+  } catch (e) {}
+};
+$('lf').addEventListener('submit', function (e) {
+  e.preventDefault();
+  if (encodeURIComponent(fa2en($('lp').value.trim())) === getPin()) {
+    $('lock').style.display = 'none';
+    $('lp').value = '';
+  } else { alert('رمز اشتباه است.'); }
+});
+
+load();
+render();
+lockIfNeeded();
+</script>
+</body>
+</html>
